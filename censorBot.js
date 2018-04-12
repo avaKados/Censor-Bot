@@ -14,7 +14,7 @@ bot.on('message', function(user, userID, channelId, message, event){
 		if(message == 'ping'){
 			bot.sendMessage({
 				to: channelID,
-				message: "pong"
+				message: "pong-pong"
 			});
 		}
 });
