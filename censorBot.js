@@ -3,7 +3,7 @@
 //https://www.youtube.com/watch?v=ak8ZoizL82Y
 
 const Discord = require('discord.io');
-var auth = require('./auth.json');
+var config = require('./config.json');
 
 //sources: http://www.bannedwordlist.com/lists/swearWords.txt
 //https://www.noswearing.com/dictionary
@@ -29,8 +29,9 @@ var bannedWords = ['anal', 'anus','arse','ass','ass-hat','assbag','asscock','ass
 		'wank','whore','whores','whoreface'];
 
 //initialize bot
-var bot = new Discord.client({
-		token: "", autorun: true
+var bot = new Discord.Client({
+		token: config.token,
+		autorun: true
 });
 
 bot.on('ready', function(){
@@ -42,7 +43,7 @@ bot.on('message', function(user, userID, channelId, message, event){
 	bannedWords.forEach9function(item, index, array){
 		if(message == item){
 			message.delete()
-			message.author.send("Don't say stupid shit, dumbfuck, thanks!")
+			message.author.send("Don't say stupid shit, dumbfuck")
 		}
 	}
 });
