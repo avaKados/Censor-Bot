@@ -78,6 +78,8 @@ bot.on('message', function(user, userID, channelID, message, event){
 		
 });
 
+//reformats user input to style of bannedWords array
+//format: " MESSAGE1 MESSAGE2 " with all symbols removed
 function formatMessage(args){
 	var i = 1;
 	var word = " ";
@@ -88,6 +90,8 @@ function formatMessage(args){
 	return word;
 }
 
+//adds message to bannedWords array
+//reports to channel that the message has been banned
 function banWord(channelID, args){
 	word = formatMessage(args);
 
@@ -104,10 +108,13 @@ function banWord(channelID, args){
 	bannedWords.push(word);
 }
 
+//removes message from bannedWords if present
+//reports to channel that message was unbanned or wasn't previously banned
 function unBanWord(channelID, args){
 	word = formatMessage(args);
 	var i = bannedWords.indexOf(word);
 
+	//when message is currently unbanned
 	if(i < 0){
 		bot.sendMessage({
 			to: channelID, 
@@ -120,6 +127,8 @@ function unBanWord(channelID, args){
 			}
 		})
 	}
+
+	//when message is currently banned
 	else{
 		bot.sendMessage({
 			to: channelID, 
@@ -135,6 +144,9 @@ function unBanWord(channelID, args){
 	}	
 }
 
+//checks if message is in need of censorship
+//returns index of word in bannedWords if present
+//returns -1 otherwise
 function needsCensor(message){
 	msg = " " + message.toUpperCase().replace(/[.,\/#!$+<>%\^&\*;:{}=\-_`~()]/g,"") + " ";
 	
@@ -151,6 +163,7 @@ function needsCensor(message){
 	return -1;
 }
 
+//sends a randomly chosen warning message to sender of censored message
 function warn(userID, index){
 	var rand = Math.floor(Math.random() * 5);	
 	switch(rand){
