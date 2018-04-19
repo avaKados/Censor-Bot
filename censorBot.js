@@ -235,7 +235,7 @@ function warn(userID, index){
 	}
 }
 
-function censorBot(userID, chennelID, message, event){
+function censorBot(userID, channelID, message, event){
 	i = needsCensor(message);
 	if(i >= 0){
 
