@@ -26,7 +26,7 @@ var bannedWords = [' ANAL ', ' ANUS ',' ARSE ',' ASS ',' ASSBAG ',' ASSCOCK ',' 
 					' PENIS ',' PISS ',' PISSED ',' POONANI ',' PUBE ',' PUBES ',' PUSS ',' PUSSIES ',' PUSSY ',
 					' QUEEF ',' QUEERHOLE ',
 					' RETARD ',' RETARDS ',' RIMJOB ',' RIMJOBS ',
-					' SCHLONG ',' SCROTUM ',' SCROTUMS ',' SEX ',' SEXY ',' SHIT ',' SHITBAG ',' SHITBRAINS ',' SHITCANNED ',' SHITCUNT ',' SHITDICK ',' SHITFACE ',' SHITFACED ',' SHITHEAD ',' SHITHOLE ',' SHITS ',' SHITSTAIN ',' SHITTING ',' SHITTY ',' SHIT ',' SKANK ',' SKANKS ',' SKULLFUCK ',' SLUT ',' SLUTBAG ',' SLUTS ',' SMEGMA ',' SPLOOGE ',' SUCKASS ',
+					' SCHLONG ',' SCROTUM ',' SCROTUMS ',' SEX ',' SEXY ',' SHIT ',' SHITBAG ',' SHITBRAINS ',' SHITCANNED ',' SHITCUNT ',' SHITDICK ',' SHITFACE ',' SHITFACED ',' SHITHEAD ',' SHITHOLE ',' SHITS ',' SHITSTAIN ',' SHITTING ',' SHITTY ',' SKANK ',' SKANKS ',' SKULLFUCK ',' SLUT ',' SLUTBAG ',' SLUTS ',' SMEGMA ',' SPLOOGE ',' SUCKASS ',
 					' TARD ',' TESTICLE ',' TESTICLES ',' TIT ',' TITFUCK ',' TITS ',' TITTY ',' TITTYFUCK ',' TITTIES ',' TWAT ',' TWATS ',' TWATWAFFLE ',
 					' UNCLEFUCKER ',' UNCLEFUCKERS ',
 					' VAG ',' VAGINA ',' VAGINAS ',' VAJAYJAY ',
@@ -90,22 +90,37 @@ function formatMessage(args){
 	return word;
 }
 
-//adds message to bannedWords array
-//reports to channel that the message has been banned
+//adds message to bannedWords array if not already present
+//reports to channel that the message has been banned or is already banned
 function banWord(channelID, args){
 	word = formatMessage(args);
 
-	bot.sendMessage({
-		to: channelID, 
-		embed: {
-			color: 0xe74C3C, 
-			fields: [{
-				name: ":x: WORD BANNED :x:", 
-				value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been banned\n"
-			}]
-		}
-	})
-	bannedWords.push(word);
+	if(bannedWords.indexOf(word) < 0){
+		bot.sendMessage({
+			to: channelID, 
+			embed: {
+				color: 0xe74C3C, 
+				fields: [{
+					name: ":x: WORD BANNED :x:", 
+					value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been banned\n"
+				}]
+			}
+		})
+		bannedWords.push(word);
+	}
+
+	else{
+		bot.sendMessage({
+			to: channelID, 
+			embed: {
+				color: 0xe74C3C, 
+				fields: [{
+					name: ":x: WORD ALREADY BANNED :x:", 
+					value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has already been banned\n"
+				}]
+			}
+		})
+	}
 }
 
 //removes message from bannedWords if present
