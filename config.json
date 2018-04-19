@@ -1,0 +1,9 @@
+{   
+	"name": "censor-bot",
+  	"version": "1.0.0",
+  	"description": "Personal Bot",
+  	"main": "censorBot.js",
+  	"author": "Emily Kabban",
+	"token": "token",
+	"prefix": "*"
+}
