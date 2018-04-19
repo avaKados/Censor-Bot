@@ -71,10 +71,10 @@ bot.on('message', function(user, userID, channelID, message, event){
 //reformats user input to style of bannedWords array
 //format: " MESSAGE1 MESSAGE2 " with all symbols removed
 function formatMessage(args){
-	var i = 1;
-	var word = " ";
+	var i = 2;
+	var word = args[1];
 	while(i < args.length){
-		word += args[i].toUpperCase().replace(/[.,\/#!$+<>%\^&\*;:{}=\-_`~()]/g,"") + " ";
+		word += " " + args[i].toUpperCase().replace(/[.,\/#!$+<>%\^&\*;:{}=\-_`~()]/g,"");
 		i++;
 	}
 	return word;
