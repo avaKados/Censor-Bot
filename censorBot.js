@@ -64,18 +64,8 @@ bot.on('message', function(user, userID, channelID, message, event){
 	}
 
 
-	//delete message, warn user
-	i = needsCensor(message);
-	if(i >= 0){
-
-		bot.deleteMessage({
-			channelID: channelID, 
-			messageID: event.d.id
-		})
-
-		warn(userID, i);
-	}
-		
+	//if needsCensor, delete message, warn user
+	censorBot(userID, channelID, message, event);	
 });
 
 //reformats user input to style of bannedWords array
@@ -244,3 +234,27 @@ function warn(userID, index){
 			break;
 	}
 }
+
+function censorBot(userID, chennelID, message, event){
+	i = needsCensor(message);
+	if(i >= 0){
+
+		bot.deleteMessage({
+			channelID: channelID, 
+			messageID: event.d.id
+		})
+
+		warn(userID, i);
+	}
+}
+
+/*
+var exports = modules.export ={
+	formatMessage: formatMessage,
+	banWord: banWord,
+	unBanWord: unBanWord,
+	needsCensor: needsCensor,
+	warn: warn,
+	censorBot: censorBot
+};
+*/
