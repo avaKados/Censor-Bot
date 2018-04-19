@@ -11,13 +11,13 @@ var config = require('./config.json');
 //words banned from the server
 //sources: http://www.bannedwordlist.com/lists/swearWords.txt
 //https://www.noswearing.com/dictionary
-var bannedWords = [' ANAL ', ' ANUS ',' ARSE ',' ASS ',' ASS-HAT ',' ASSBAG ',' ASSCOCK ',' ASSES ',' ASSFACE ',' ASSFUCK ',' ASSFUCKER ',' ASSHAT ',' ASSHOLE ',' ASSHOLES ',' ASSLICKER ',' ASSWIPE ',
+var bannedWords = [' ANAL ', ' ANUS ',' ARSE ',' ASS ',' ASSBAG ',' ASSCOCK ',' ASSES ',' ASSFACE ',' ASSFUCK ',' ASSFUCKER ',' ASSHAT ',' ASSHOLE ',' ASSHOLES ',' ASSLICKER ',' ASSWIPE ',
 					' BALLSACK ',' BALL SACK ',' BALLZ ',' BASTARD ',' BITCH ',' BITCHASS ',' BITCHES ',' BITCHTITS ',' BITCHY ',' BLOWJOB ',' BLOWJOBS ',' BLOW JOB ',' BONER ',' BONERS ',' BOOB' ,' BOOBS ',' BROTHERFUCKER ',' BULLSHIT ',' BUTTFUCKER ',' BUTTPLUG ',
 					' CHOAD ',' CHODE ',' CLIT ',' CLITORIS ',' COCK ',' COCKHEAD ',' COCKMASTER ',' COCKS ',' COCKSUCKER ',' COCKSUCKERS ',' COOCHIE ',' COOCHY ',' COOTER ',' CRAP ',' CUM ',' CUMDUMPSTER ',' CUMGUZZLER ',' CUMSLUT ',' CUNT ',' CUNTASS ',' CUNTFACE ',' CUNTS ',
 					' DICK ',' DICKFACE ',' DICKFUCK ',' DICKHEAD ',' DICKHOLE ',' DICKMILK ',' DICKS ',' DICKSNEEZE ',' DICKSUCKER ',' DICKWAD ',' DILDO ',' DILDOS ',' DIPSHIT ',' DOOCHBAG ',' DOUCHE ',' DOUCHEBAG ',' DUMBASS ',' DUMBFUCK ',' DUMBSHIT ',' DYKE ',' DYKES ',
 					' FAG ',' FAGBAG ',' FAGGOT ',' FAGGIT ',' FAGGOTS ',' FAGS ',' FATASS ',' FELLATIO ',' FUCK ',' FUCKASS ',' FUCKBOY ',' FUCKBUTT ',' FUCKED ',' FUCKS ',' F U C K ',' FUCKER ',' FUCKERS ',' FUCKFACE ',' FUCKHEAD ',' FUCKHOLE ',' FUCKIN ',' FUCKING ',' FUCKNUT ',' FUCKOFF ',' FUCKSTICK ',' FUCKTARD ',' FUCKUP ',' FUCKWAD ',
 					' GAYASS ',' GAYFUCK ',' GAYLORD ',' GAYTARD ',' GAYWAD ',
-					' HANDJOB ',' HARDON ',' HARD-ON ',' HO ',' HOS ',' HOE ',' HOES ',' HOMODUMBSHIT ',' HUMPING ',
+					' HANDJOB ',' HARDON ',' HO ',' HOS ',' HOE ',' HOES ',' HOMODUMBSHIT ',' HUMPING ',
 					' JACKASS ',' JACKOFF ',' JACK OFF ',' JAGOFF ',' JIZZ ',
 					' KOOCH ',' KOOTCH ',' KUNT ',' KUNTS ',
 					' LABIA ',' LAMEASS ',' LARDASS ',' LESBO ',
@@ -49,66 +49,170 @@ bot.on('message', function(user, userID, channelID, message, event){
 	//note: does not carry over between sessions
 	if(message.substring(0,1) == config.prefix){
 		var args = message.substring(1).split(' ');
-
 		var cmd = args[0];
 
-		var i = 1;
-		var word = " ";
-		while(i < args.length){
-			word += args[i].toUpperCase() + " ";
-			i++;
-		}
-		
 		switch(cmd) {
 			case 'ban':
-				bot.sendMessage({
-					to: channelID, 
-					embed: {
-						color: 0xe74C3C, 
-						fields: [{
-							name: ":x: "value", WORD BANNED :x:", 
-							value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been banned\n"
-						}]
-					}
-				})
-				bannedWords.push(word);
+				banWord(channelID,args);
 				break;
+
 			case 'unban':
-				var i = bannedWords.indexOf(word);
-				bot.sendMessage({
-					to: channelID, 
-					embed: {
-						color: 0x2ECC71, 
-						fields: [{
-							name: ":white_check_mark: WORD UNBANNED :white_check_mark:", 
-							value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been unbanned!\n"
-						}]
-					}
-				})
-				bannedWords.splice(i, 1);
-				break;	
+				unBanWord(channelID,args);
+				break;
 		}
 		return;		
 	}
 
-	var needsCensor = false;
-	msg = " " + message.toUpperCase() + " ";
+
+	//delete message, warn user
+	i = needsCensor(message);
+	if(i >= 0){
+
+		bot.deleteMessage({
+			channelID: channelID, 
+			messageID: event.d.id
+		})
+
+		warn(userID, i);
+	}
+		
+});
+
+function formatMessage(args){
+	var i = 1;
+	var word = " ";
+	while(i < args.length){
+		word += args[i].toUpperCase().replace(/[.,\/#!$+<>%\^&\*;:{}=\-_`~()]/g,"") + " ";
+		i++;
+	}
+	return word;
+}
+
+function banWord(channelID, args){
+	word = formatMessage(args);
+
+	bot.sendMessage({
+		to: channelID, 
+		embed: {
+			color: 0xe74C3C, 
+			fields: [{
+				name: ":x: WORD BANNED :x:", 
+				value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been banned\n"
+			}]
+		}
+	})
+	bannedWords.push(word);
+}
+
+function unBanWord(channelID, args){
+	word = formatMessage(args);
+	var i = bannedWords.indexOf(word);
+
+	if(i < 0){
+		bot.sendMessage({
+			to: channelID, 
+			embed: {
+				color: 0x2ECC71, 
+				fields: [{
+					name: ":white_check_mark: WORD ALREADY ALLOWED :white_check_mark:", 
+					value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" was not banned!\n"
+				}]
+			}
+		})
+	}
+	else{
+		bot.sendMessage({
+			to: channelID, 
+			embed: {
+				color: 0x2ECC71, 
+				fields: [{
+					name: ":white_check_mark: WORD UNBANNED :white_check_mark:", 
+					value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been unbanned!\n"
+				}]
+			}
+		})
+		bannedWords.splice(i, 1);
+	}	
+}
+
+function needsCensor(message){
+	msg = " " + message.toUpperCase().replace(/[.,\/#!$+<>%\^&\*;:{}=\-_`~()]/g,"") + " ";
 	
 	//checks banned words
 	var i = 0;
 	while(i < bannedWords.length && !(msg.includes(bannedWords[i]))){
 		i++;
 	}
+
 	if(i < bannedWords.length){
-		needsCensor = true;
+		return i;
 	}
 
+	return -1;
+}
 
-	//delete message, warn user
-	if(needsCensor){
-		bot.deleteMessage({channelID: channelID, messageID: event.d.id})
-		bot.sendMessage({to: userID, message: "Don't say that stupid junk"})
-				
+function warn(userID, index){
+	var rand = Math.floor(Math.random() * 5);	
+	switch(rand){
+		case 0:
+			bot.sendMessage({
+				to: userID, 
+				embed: {
+					color: 0xF4D03F, 
+					fields: [{
+						name: ":warning: THIS IS A WARNING :warning:", 
+						value: "please don't say bad words :upside_down:\nBanned phrase: " + bannedWords[i] 
+					}]
+				}
+			})
+			break;
+		case 1:
+			bot.sendMessage({
+				to: userID, 
+				embed: {
+					color: 0xF4D03F, 
+					fields: [{
+						name: ":warning: THIS IS A WARNING :warning:", 
+						value: "no naughty wordies :speak_no_evil:\nBanned phrase: " + bannedWords[i] 
+					}]
+				}
+			})
+			break;
+		case 2:
+			bot.sendMessage({
+				to: userID, 
+				embed: {
+					color: 0xF4D03F, 
+					fields: [{
+						name: ":warning: THIS IS A WARNING :warning:", 
+						value: "no one likes a potty mouth :thumbsdown:\nBanned phrase: " + bannedWords[i] 
+					}]
+				}
+			})
+			break;
+		case 3:
+			bot.sendMessage({
+				to: userID, 
+				embed: {
+					color: 0xF4D03F, 
+					fields: [{
+						name: ":warning: THIS IS A WARNING :warning:", 
+						value: "my heart breaks everytime you swear :broken_heart:\nBanned phrase: " + bannedWords[i] 
+					}]
+				}
+			})
+			break;
+		case 4:
+			bot.sendMessage({
+				to: userID, 
+				embed: {
+					color: 0xF4D03F, 
+					fields: [{
+						name: ":warning: THIS IS A WARNING :warning:", 
+						value: "only losers say things like that :sunglasses:\nBanned phrase: " + bannedWords[i] 
+					}]
+				}
+			})
+			break;
 	}
-		
-});
+}
