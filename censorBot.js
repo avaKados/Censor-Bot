@@ -2,6 +2,7 @@
 //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 //https://www.youtube.com/watch?v=ak8ZoizL82Y
 //https://github.com/izy521/discord.io/issues/144
+//https://discordapp.com/developers/docs/resources/channel#embed-object-embed-field-structure
 
 
 const Discord = require('discord.io');
@@ -30,7 +31,6 @@ var bannedWords = [' ANAL ', ' ANUS ',' ARSE ',' ASS ',' ASS-HAT ',' ASSBAG ',' 
 					' UNCLEFUCKER ',' UNCLEFUCKERS ',
 					' VAG ',' VAGINA ',' VAGINAS ',' VAJAYJAY ',
 					' WANK ',' WHORE ',' WHORES ',' WHOREFACE ']
-var needsCensor = false;
 
 //initialize bot
 var bot = new Discord.Client({
@@ -38,27 +38,76 @@ var bot = new Discord.Client({
 	autorun: true
 });
 
-bot.on('ready', function(evt){
+bot.on('ready', function(event){
 	console.log('Logged in as %s - %s\n', bot.username, bot.id);
 });
 
 //check each message for banned words
 bot.on('message', function(user, userID, channelID, message, event){
 
+	//admins may use command prefixed with "*" to ban another word for the session
+	//note: does not carry over between sessions
+	if(message.substring(0,1) == config.prefix){
+		var args = message.substring(1).split(' ');
+
+		var cmd = args[0];
+
+		var i = 1;
+		var word = " ";
+		while(i < args.length){
+			word += args[i].toUpperCase() + " ";
+			i++;
+		}
+		
+		switch(cmd) {
+			case 'ban':
+				bot.sendMessage({
+					to: channelID, 
+					embed: {
+						color: 0xe74C3C, 
+						fields: [{
+							name: ":x: "value", WORD BANNED :x:", 
+							value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been banned\n"
+						}]
+					}
+				})
+				bannedWords.push(word);
+				break;
+			case 'unban':
+				var i = bannedWords.indexOf(word);
+				bot.sendMessage({
+					to: channelID, 
+					embed: {
+						color: 0x2ECC71, 
+						fields: [{
+							name: ":white_check_mark: WORD UNBANNED :white_check_mark:", 
+							value: "the phrase \"**" + word.substring(1, word.length-1) + "**\" has been unbanned!\n"
+						}]
+					}
+				})
+				bannedWords.splice(i, 1);
+				break;	
+		}
+		return;		
+	}
+
 	var needsCensor = false;
 	msg = " " + message.toUpperCase() + " ";
 	
 	//checks banned words
-	bannedWords.forEach(function(item, index){
-		if(msg.includes(item)){
-			needsCensor = true;
-		}
-	})
-	
+	var i = 0;
+	while(i < bannedWords.length && !(msg.includes(bannedWords[i]))){
+		i++;
+	}
+	if(i < bannedWords.length){
+		needsCensor = true;
+	}
+
+
 	//delete message, warn user
 	if(needsCensor){
 		bot.deleteMessage({channelID: channelID, messageID: event.d.id})
-		bot.sendMessage({to: channelID, message: "Don't say stupid stuff"})
+		bot.sendMessage({to: userID, message: "Don't say that stupid junk"})
 				
 	}
 		
